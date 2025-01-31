@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Memory Card Manager JS</title>
+	<meta http-equiv="content-Type" content="text/html; charset=UTF-8"/>
+	<meta name="description" content="An online web-based memory card manager. Supported platforms: PlayStation and GameCube."/>
+	<meta name="keywords" content="memory,card,manager,playstation,psx,online,html5,web,extract,insert,inject,savegame"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+
+	<link type="text/css" rel="stylesheet" href="./core/memcard_manager.css" media="all"/>
+	<style>
+		header{text-align:center;max-height:none}
+		header img{max-width:100%;max-height:auto}
+
+		.link-github{color:#161414;}
+		.link-github svg{height:16px; vertical-align:middle}
+		.link-github:hover{color:#555;}
+
+		.memcard{text-align:center;}
+		.memcard:hover img{opacity:.5;}
+		.memcard img{transition: opacity .2s}
+		footer{text-align:center;}
+
+		#systems{
+			display:flex;
+			gap:30px;
+			margin:32px auto;
+			justify-content:center;
+			align-items:center;
+		}
+
+		/* responsive */
+		@media only screen and (max-width:1024px){
+			#systems{
+				flex-direction:column;
+			}
+			.memcard{
+				width:320px;
+				min-width:160px;
+			}
+		}
+		@media only screen and (max-width:480px){
+			.memcard img{
+				max-height:104px;
+			}
+		}
+		@media only screen and (max-width:384px){
+			#systems{
+				margin:32px 16px;
+			}
+			.memcard{
+				width:100%;
+				min-width:auto;
+			}
+		}
+	</style>
+</head>
+<body class="green">
+
+<!-- HEADER -->
+<header>
+	<img src="logo.png" />
+	<h1 class="hide">Memory Card Manager JS</h1>
+</header>
+
+<!-- MAIN -->
+<div style="font-size:110%; text-align:center; margin-bottom:48px;">
+	<a href="https://github.com/marcrobledo/memory-card-manager-js/" target="_blank" class="link-github">See more about this project on <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="M8 0a8 8 0 0 0-2.5 15.6c.4 0 .5-.2.5-.4v-1.5c-2 .4-2.5-.5-2.7-1 0-.1-.5-.9-.8-1-.3-.2-.7-.6 0-.6.6 0 1 .6 1.2.8.7 1.2 1.9 1 2.4.7 0-.5.2-.9.5-1-1.8-.3-3.7-1-3.7-4 0-.9.3-1.6.8-2.2 0-.2-.3-1 .1-2 0 0 .7-.3 2.2.7a7.4 7.4 0 0 1 4 0c1.5-1 2.2-.8 2.2-.8.5 1.1.2 2 .1 2.1.5.6.8 1.3.8 2.2 0 3-1.9 3.7-3.6 4 .3.2.5.7.5 1.4v2.2c0 .2.1.5.5.4A8 8 0 0 0 16 8a8 8 0 0 0-8-8z"/></svg> GitHub</a>
+</div>
+<div style="font-size:150%; text-align:center;">
+	Select your memory card platform:
+</div>
+<div id="systems">
+	<a href="psx/" class="memcard" title="PlayStation"><img src="psx/favicon192.png" alt="PlayStation" /></a>
+	<a href="gc/" class="memcard" title="GameCube"><img src="gc/favicon192.png" alt="GameCube" /></a>
+</div>
+
+<!-- FOOTER -->
+<footer>
+	Memory Card Manager JS by <a href="https://www.marcrobledo.com">Marc Robledo</a>
+</footer>
+
+</body></html>

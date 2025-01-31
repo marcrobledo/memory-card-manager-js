@@ -1,0 +1,17 @@
+{
+	"short_name":"GC Memory Card Manager",
+	"name":"GameCube Memory Card Manager JS",
+	"icons":[
+		{
+			"src": "favicon192.png",
+			"sizes": "192x192",
+			"type": "image/png",
+			"density": "1.0"
+		}
+	],
+	"start_url": "index.html",
+	"display": "standalone",
+	"orientation": "portrait",
+	"theme_color": "#737373",
+	"background_color": "#737373"
+}
