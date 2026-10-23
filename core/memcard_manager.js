@@ -7,7 +7,7 @@
 *
 * MIT License
 * 
-* Copyright (c) 2019-2025 Marc Robledo
+* Copyright (c) 2019-2026 Marc Robledo
 * 
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -352,11 +352,24 @@ $(document).ready(function(){
 		);
 	}
 
+	if(SYSTEM.defaultIconFile){
+		const SLOT_ICON=new Image();
+		SLOT_ICON.onload=function(){
+			const canvas=document.createElement('canvas');
+			canvas.width=SLOT_ICON.width;
+			canvas.height=SLOT_ICON.height;
+			const ctx=canvas.getContext('2d');
+			ctx.drawImage(SLOT_ICON, 0, 0);
+			SYSTEM.defaultIconImageData=ctx.getImageData(0, 0, SLOT_ICON.width, SLOT_ICON.height);
+		};
+		SLOT_ICON.src='./' + SYSTEM.defaultIconFile;
+	}
+
 	$('#btn-memcard-load').on('click', function(evt){
 		$('#input-file').trigger('click');
 	});
 	$('#btn-memcard-format').on('click', function(evt){
-		if(currentMemoryCard.content.length)
+		if(currentMemoryCard.content.length || SYSTEM.differentSizes)
 			document.getElementById('modal-format').showModal();
 	});
 	$('#btn-content-delete').on('click', function(evt){
@@ -421,7 +434,8 @@ $(document).ready(function(){
 		document.getElementById('modal-content').close(1);
 	});
 	$('#modal-format .btn-danger').on('click', function(evt){
-		currentMemoryCard.format();
+		const formatOptions=document.querySelector('#modal-format input[name=format_options]:checked')
+		currentMemoryCard.format(formatOptions? formatOptions.value : null);
 		refreshHtml(currentMemoryCard);
 		document.getElementById('modal-format').close(1);
 	});

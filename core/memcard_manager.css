@@ -37,10 +37,20 @@ body.purple{
 	--color-primary-highlight:#8956fb;
 	--color-primary-focus:#cdb6ff;
 }
-body.pink{
-	--color-primary:#f7389a;
-	--color-primary-highlight:#fd61b1;
-	--color-primary-focus:#ffbddf;
+body.orange{
+	--color-primary:#f56a1b;
+	--color-primary-highlight:#f77f3a;
+	--color-primary-focus:#fbc9a8;
+}
+body.blue{
+	--color-primary:#2f7de1;
+	--color-primary-highlight:#4b91ee;
+	--color-primary-focus:#b4d3fa;
+}
+body.red{
+	--color-primary:#e0373a;
+	--color-primary-highlight:#ea5558;
+	--color-primary-focus:#f7b6b7;
 }
 
 /* flex */
