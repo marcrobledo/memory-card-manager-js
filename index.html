@@ -3,7 +3,7 @@
 <head>
 	<title>Memory Card Manager JS</title>
 	<meta http-equiv="content-Type" content="text/html; charset=UTF-8"/>
-	<meta name="description" content="An online web-based memory card manager. Supported platforms: PlayStation and GameCube."/>
+	<meta name="description" content="An online web-based memory card manager. Supported platforms: PlayStation, GameCube, Dreamcast, Sega Saturn, Mega CD and Nintendo 64."/>
 	<meta name="keywords" content="memory,card,manager,playstation,psx,online,html5,web,extract,insert,inject,savegame"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
 
@@ -13,7 +13,7 @@
 	<meta name="twitter:domain" content="marcrobledo.com">
 	<meta property="og:title" content="Memory Card Manager JS">
 	<meta name="twitter:title" content="Memory Card Manager JS">
-	<meta name="twitter:description" content="Online web-based memory card manager. Supported platforms: PlayStation and GameCube.">
+	<meta name="twitter:description" content="Online web-based memory card manager. Supported platforms: PlayStation, GameCube, Dreamcast, Sega Saturn, Mega CD and Nintendo 64.">
 	<meta property="og:image" content="https://www.marcrobledo.com/memory-card-manager-js/core/assets/thumbnail.jpg">
 	<meta name="twitter:image" content="https://www.marcrobledo.com/memory-card-manager-js/core/assets/thumbnail.jpg">
 	<meta name="twitter:card" content="photo">
@@ -27,13 +27,24 @@
 		.link-github svg{height:16px; vertical-align:middle}
 		.link-github:hover{color:#555;}
 
-		.memcard{text-align:center;}
+		.memcard{
+			width:224px;
+			min-width:auto;
+			text-align:center;
+			border-radius:8px;
+			transition: transform .2s, border-radius .2s;
+		}
+		.memcard:hover{
+			transform: translateY(-10px);
+			border-radius:24px;
+		}
 		.memcard:hover img{opacity:.5;}
-		.memcard img{transition: opacity .2s}
+		.memcard img{transition: opacity .2s; max-width:100%;}
 		footer{text-align:center;}
 
 		#systems{
-			display:flex;
+			display:grid;
+			grid-template-columns: repeat(3, 1fr);
 			gap:30px;
 			margin:32px auto;
 			justify-content:center;
@@ -43,25 +54,23 @@
 		/* responsive */
 		@media only screen and (max-width:1024px){
 			#systems{
-				flex-direction:column;
+			grid-template-columns: repeat(2, 1fr);
 			}
 			.memcard{
-				width:320px;
-				min-width:160px;
+				width:224px;
+			}
+		}
+		@media only screen and (max-width:640px){
+			.memcard{
+				width:128px;
 			}
 		}
 		@media only screen and (max-width:480px){
-			.memcard img{
-				max-height:104px;
-			}
-		}
-		@media only screen and (max-width:384px){
 			#systems{
 				margin:32px 16px;
 			}
 			.memcard{
-				width:100%;
-				min-width:auto;
+				width:96px;
 			}
 		}
 	</style>
@@ -84,6 +93,10 @@
 <div id="systems">
 	<a href="psx/" class="memcard" title="PlayStation"><img src="psx/favicon192.png" alt="PlayStation" /></a>
 	<a href="gc/" class="memcard" title="GameCube"><img src="gc/favicon192.png" alt="GameCube" /></a>
+	<a href="dc/" class="memcard" title="Dreamcast"><img src="dc/favicon192.png" alt="Dreamcast" /></a>
+	<a href="ss/" class="memcard" title="Sega Saturn"><img src="ss/favicon192.png" alt="Sega Saturn" /></a>
+	<a href="mcd/" class="memcard" title="Mega CD / Sega CD"><img src="mcd/favicon192.png" alt="Mega CD / Sega CD" /></a>
+	<a href="n64/" class="memcard" title="Nintendo 64 Controller Pak"><img src="n64/favicon192.png" alt="Nintendo 64 Controller Pak" /></a>
 </div>
 
 <!-- FOOTER -->

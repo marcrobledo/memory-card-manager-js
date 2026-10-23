@@ -2,24 +2,27 @@
 A console memory card manager made in HTML5.
 
 **Features:**
+- **Supported systems:**
+   - PlayStation
+   - GameCube
+   - Dreamcast
+   - Sega Saturn
+   - Mega CD / Sega CD
+   - Nintendo 64 Controller Pak
 - Read and write from/to memory card raw dumps
 - Import and export single savegames
 - Copy savegames between memory cards
-- **Supported systems:** **PlayStation**, Gamecube<sup>1</sup>
 
 It is an interface capable of managing any console memory card raw dumps and their contents: export and import savegames, format memory card, preview game icons, transfer between memory cards, etc.
 
-I started this in 2019 as a proof of concept, managed to resume it in 2023 and implemented fully functional [PlayStation support](https://www.marcrobledo.com/memory-card-manager-js/psx/).
+I started this in 2019 as a proof of concept, managed to resume it in 2023 and implemented fully functional [PlayStation support](https://www.marcrobledo.com/memory-card-manager-js/psx/). A few years later, I ended up implementing GameCube and Dreamcast in order to prove the potential of the interface.
 
-<sup>1</sup> Unfortunately, due to lack of time, I never managed to finish [GameCube support](https://www.marcrobledo.com/memory-card-manager-js/gc/), it loads data correctly, but it's missing correct code for checksum recalculation (in other words: the saved data won't be read by the console). Still, I leave it here as a proof of the interface potential.
-
-## To-do
-- rewrite using more modern Javascript code
-- fix Gamecube support
-- add support for other systems: Dreamcast, N64 Controller Pak...
+Support for Sega Saturn, Nintendo 64 Controller Pak and Mega CD were done by an AI agent with few human edits. The project's structure was good enough for it to give decent results and clean code.
 
 ## Resources used
 * [Octicons](https://primer.style/octicons/) by GitHub Inc.
+* systems' file structures were already documented, so I based code mostly on them (see their respective `.js` files for sources used)
 
 ## License
 This project is licensed under the [MIT License](https://github.com/marcrobledo/memory-card-manager-js?tab=License-1-ov-file).
+Except `ss/.js`, `mcd/.js` and `n64/.js` which are all released under no license.
