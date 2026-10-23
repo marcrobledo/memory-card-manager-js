@@ -7,7 +7,7 @@
 *
 * MIT License
 * 
-* Copyright (c) 2023-2025 Marc Robledo
+* Copyright (c) 2023-2026 Marc Robledo
 * 
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -56,9 +56,9 @@ const VALID_HEADER_SIZES=[HEADER_SIZE_59, HEADER_SIZE_251, HEADER_SIZE_1019];
 const OFFSET_BLOCK_DIRECTORY=0x2000;
 const OFFSET_BLOCK_DIRECTORY_BACKUP=0x4000;
 const OFFSET_DIRECTORY_DIRECTORY_ENTRIES=OFFSET_BLOCK_DIRECTORY + 0x0000; //max 127
-const OFFSET_DIRECTORY_UPDATE_COUNTER=OFFSET_BLOCK_DIRECTORY + 0x0ffa;
-const OFFSET_DIRECTORY_CHECKSUM1=OFFSET_BLOCK_DIRECTORY + 0x0ffc;
-const OFFSET_DIRECTORY_CHECKSUM2=OFFSET_BLOCK_DIRECTORY + 0x0ffe;
+const OFFSET_DIRECTORY_UPDATE_COUNTER=OFFSET_BLOCK_DIRECTORY + 0x1ffa;
+const OFFSET_DIRECTORY_CHECKSUM1=OFFSET_BLOCK_DIRECTORY + 0x1ffc;
+const OFFSET_DIRECTORY_CHECKSUM2=OFFSET_BLOCK_DIRECTORY + 0x1ffe;
 const DIRECTORY_SIZE=0x40;
 
 const DIRECTORY_ENTRY_GAMECODE=0x0000;
@@ -92,19 +92,9 @@ const OFFSET_BLOCK_FILE_DATA=0xa000;
 
 
 
-
-
 const GC_REGION_JPN='J';
 const GC_REGION_USA='E';
 const GC_REGION_EUR='P';
-
-/* service worker */
-const FORCE_HTTPS=true;
-if(FORCE_HTTPS && location.protocol==='http:')
-	location.href=window.location.href.replace('http:','https:');
-/*else if(location.protocol==='https:' && 'serviceWorker' in navigator)
-	navigator.serviceWorker.register('/memcard_manager/psx/_cache_service_worker.js', {scope: '/memcard_manager/psx/'});*/
-
 
 
 
@@ -113,6 +103,7 @@ const SYSTEM={
 	slotLetters:true,
 	validExtensions:'.raw,.gci',
 	exampleFile:'example.raw',
+	differentSizes:true,
 	infoFields:[
 		'comment1',
 		'comment2',
@@ -131,13 +122,6 @@ const SYSTEM={
 }
 
 
-/* initialize app */
-$(document).ready(function(){
-	$('#modal-warning .btn-cancel').on('click', function(evt){
-		document.getElementById('modal-warning').close();
-	});
-	$('#modal-warning').get(0).showModal();
-});
 
 
 
@@ -183,19 +167,37 @@ MemoryCard.fromArrayBuffer=function(arrayBuffer, name){
 	var rawFile=new BinaryReader(arrayBuffer);
 
 	if(RAW_SIZES.indexOf(rawFile.size)!==-1){
-		var memoryCard=new MemoryCard(rawFile.slice(0, OFFSET_BLOCK_FILE_DATA)._u8array.buffer, name);
+		var activeDirectory=getCurrentGcBlockOffset(rawFile, OFFSET_BLOCK_DIRECTORY, OFFSET_BLOCK_DIRECTORY_BACKUP, OFFSET_DIRECTORY_UPDATE_COUNTER - OFFSET_BLOCK_DIRECTORY, false);
+		var activeMap=getCurrentGcBlockOffset(rawFile, OFFSET_BLOCK_BLOCK_ALLOCATION_MAP, OFFSET_BLOCK_BLOCK_ALLOCATION_MAP_BACKUP, OFFSET_BLOCK_ALLOCATION_MAP_UPDATE_COUNTER - OFFSET_BLOCK_BLOCK_ALLOCATION_MAP, true);
+
+		var headerBlocks=rawFile.slice(0, OFFSET_BLOCK_FILE_DATA);
+		rawFile.copyTo(headerBlocks, activeDirectory, RAW_BLOCK_SIZE, OFFSET_BLOCK_DIRECTORY);
+		rawFile.copyTo(headerBlocks, activeMap, RAW_BLOCK_SIZE, OFFSET_BLOCK_BLOCK_ALLOCATION_MAP);
+		var memoryCard=new MemoryCard(headerBlocks._u8array.buffer, name);
 
 		memoryCard.content=[];
-		for(var i=0; i<128; i++){
+		for(var i=0; i<127; i++){
 			//extract GCI
-			var directoryOffset=OFFSET_DIRECTORY_DIRECTORY_ENTRIES + i * DIRECTORY_SIZE;
+			var directoryOffset=activeDirectory + i * DIRECTORY_SIZE;
 
 			var size=rawFile.readU16At(directoryOffset + DIRECTORY_ENTRY_FILESIZE);
 			if(size && size>=1 && size<=memoryCard.size){
-				var startingBlock=rawFile.readU16At(directoryOffset + DIRECTORY_ENTRY_FIRST_DATABLOCK);
 				var gciFile=new BinaryReader(DIRECTORY_SIZE + RAW_BLOCK_SIZE*size);
 				rawFile.copyTo(gciFile, directoryOffset, DIRECTORY_SIZE, 0x00);
-				rawFile.copyTo(gciFile, RAW_BLOCK_SIZE * startingBlock, RAW_BLOCK_SIZE * size, DIRECTORY_SIZE);
+
+				//file blocks are not necessarily contiguous, follow the block allocation map
+				var block=rawFile.readU16At(directoryOffset + DIRECTORY_ENTRY_FIRST_DATABLOCK);
+				var validChain=true;
+				for(var j=0; j<size; j++){
+					if(block<5 || block>=memoryCard.size + 5){
+						validChain=false;
+						break;
+					}
+					rawFile.copyTo(gciFile, RAW_BLOCK_SIZE * block, RAW_BLOCK_SIZE, DIRECTORY_SIZE + RAW_BLOCK_SIZE * j);
+					block=rawFile.readU16At(activeMap + (OFFSET_BLOCK_ALLOCATION_MAP_MAP - OFFSET_BLOCK_BLOCK_ALLOCATION_MAP) + (block - 5) * 2);
+				}
+				if(!validChain)
+					continue;
 
 				var newContent=Content.fromArrayBuffer(gciFile._u8array);
 				if(newContent){
@@ -294,27 +296,8 @@ MemoryCard.prototype.export=function(){
 
 	var nextBlock=5;
 	for(var i=0; i<this.content.length; i++){
-		if(this.content[i].fileName==='f_zero.dat' && this.content[i].size===4){
-			var encodedSerial=this.getEncodedSerial();
-			this.content[i]._rawData.writeU8At(0x0060, encodedSerial[0] & 0xffff);
-			this.content[i]._rawData.writeU8At(0x0066, encodedSerial[0] >>> 16);
-			this.content[i]._rawData.writeU8At(0x0200, encodedSerial[1] & 0xffff);
-			this.content[i]._rawData.writeU8At(0x1580, encodedSerial[1] >>> 16);
-
-			var checksum=0xffff;
-			for (var j=0x02; j<0x8000; j++){
-				checksum=(checksum ^ (j & 0xff)) >>> 0;
-				for(var k=8; k>0; k--){
-					if(checksum & 1)
-						checksum=(checksum >> 1) ^ 0x8408;
-					else
-						checksum=checksum >>> 1;
-				}
-			}
-			this.content[i]._rawData.writeU16At(0x0000, (~checksum) & 0xffff);
-		}
-
 		this.content[i]._rawData.copyTo(rawFile, DIRECTORY_SIZE, RAW_BLOCK_SIZE * this.content[i].size, RAW_BLOCK_SIZE * nextBlock);
+		this.fixSpecialGamesValidity(rawFile, this.content[i], RAW_BLOCK_SIZE * nextBlock);
 		nextBlock+=this.content[i].size;
 	}
 	for(;nextBlock<this.size+5; nextBlock++){
@@ -327,24 +310,26 @@ MemoryCard.prototype.export=function(){
 }
 
 MemoryCard.prototype.importContent=function(content){
-	var freeBlocks=this.getFreeBlocks();
+	if(this.content.length>=127)
+		return false;
 
-	if(content.size <= freeBlocks && this.content.length<127){
+	if(content.size <= this.getFreeBlocks()){
 		this.content.push(content);
 		return true;
-	}else if(this.size===59){
-		this.size=251;
-		return this.importContent(content);
-	}else if(this.size===251){
-		this.size=2019;
-		return this.importContent(content);
 	}
 	return false;
 }
 
-MemoryCard.prototype.format=function(block){
-	if(this.content.length)
+MemoryCard.prototype.format=function(newSize){
+	if(typeof newSize === 'string')
+		newSize = parseInt(newSize);
+
+	if(newSize !== 251 && newSize !== 1019)
+		newSize=59;
+
+	if(this.content.length || this.size!==newSize)
 		this.unsavedChanges=true;
+	this.size=newSize;
 	this.content=[];
 }
 
@@ -357,11 +342,49 @@ MemoryCard.prototype.deleteContent=function(content){
 	return null;
 }
 
-MemoryCard.prototype.getEncodedSerial=function(){
-	return [
-		(this.serial[0]^this.serial[2]^this.serial[4]^this.serial[6]) >>> 0,
-		(this.serial[1]^this.serial[3]^this.serial[5]^this.serial[7]) >>> 0
-	];
+
+//some games (like F-Zero GX and Phantasy Star Online series) bind their savegames to the card based on the first 0x20 bytes of the header
+const CRC32_LOOKUP_TABLE=(function(){
+	const table=new Array(256);
+	for(var i=0; i<256; i++){
+		var c=i;
+		for(var j=8; j>0; j--)
+			c=(c & 1)? ((c >>> 1) ^ 0xedb88320) >>> 0 : c >>> 1;
+		table[i]=c;
+	}
+	return table;
+}());
+MemoryCard.prototype.fixSpecialGamesValidity=function(rawFile, content, base){
+	var encodedSerial=this.getSerial();
+
+	if(content.fileName==='f_zero.dat' && content.size===4){
+		rawFile.writeU16At(base + RAW_BLOCK_SIZE + 0x0066, encodedSerial[0] >>> 16);
+		rawFile.writeU16At(base + RAW_BLOCK_SIZE * 3 + 0x1580, encodedSerial[1] >>> 16);
+		rawFile.writeU16At(base + RAW_BLOCK_SIZE + 0x0060, encodedSerial[0] & 0xffff);
+		rawFile.writeU16At(base + RAW_BLOCK_SIZE + 0x0200, encodedSerial[1] & 0xffff);
+
+		var checksum=0xffff;
+		for(var i=0x02; i<0x8000; i++){
+			checksum^=rawFile.readU8At(base + i);
+			for(var j=8; j>0; j--){
+				if(checksum & 1)
+					checksum=(checksum >>> 1) ^ 0x8408;
+				else
+					checksum=checksum >>> 1;
+			}
+		}
+		rawFile.writeU16At(base, (~checksum) & 0xffff);
+	}else if((content.fileName==='PSO_SYSTEM' || content.fileName==='PSO3_SYSTEM') && content.size>=2){
+		var block1=base + RAW_BLOCK_SIZE;
+		rawFile.writeU32At(block1 + 0x0158, encodedSerial[0]);
+		rawFile.writeU32At(block1 + 0x015c, encodedSerial[1]);
+
+		var checksum=0xdebb20e3;
+		var end=(content.fileName==='PSO3_SYSTEM')? 0x0174 : 0x0164;
+		for(var i=0x004c; i<end; i++)
+			checksum=(((checksum >>> 8) & 0xffffff) ^ CRC32_LOOKUP_TABLE[(checksum ^ rawFile.readU8At(block1 + i)) & 0xff]) >>> 0;
+		rawFile.writeU32At(block1 + 0x0048, (checksum ^ 0xffffffff) >>> 0);
+	}
 }
 
 
@@ -440,7 +463,7 @@ function Content(arrayBuffer){
 }
 Content.fromArrayBuffer=function(arrayBuffer){
 	var file=new BinaryReader(arrayBuffer);
-	if((file.size >= (RAW_BLOCK_SIZE*59+DIRECTORY_SIZE)) || (((file.size - DIRECTORY_SIZE) % RAW_BLOCK_SIZE) !== 0))
+	if((file.size > (RAW_BLOCK_SIZE*59+DIRECTORY_SIZE)) || (((file.size - DIRECTORY_SIZE) % RAW_BLOCK_SIZE) !== 0))
 		return null;
 
 	var size=file.readU16At(DIRECTORY_ENTRY_FILESIZE);
@@ -488,6 +511,15 @@ Content.prototype.info=function(){
 		name:this.comment1.replace(/</g,'&lt;').replace(/>/g,'&gt;'),
 		summary:summary
 	};
+}
+MemoryCard.prototype.getSerial=function(){
+	var serial1=0;
+	var serial2=0;
+	for(var i=0; i<0x20; i+=8){
+		serial1^=this._rawData.readU32At(i);
+		serial2^=this._rawData.readU32At(i + 4);
+	}
+	return [serial1 >>> 0, serial2 >>> 0];
 }
 
 Content.prototype.setFileName=function(fileName){
@@ -630,6 +662,10 @@ Content.prototype.readIcon=function(){
 	var uniquePaletteOffset=this._rawData.offset;
 	for(var i=0; i<MAX_ICONS; i++){
 		var frameByte=(this.iconFormat >>> (i*2)) & 0x03;
+		var frameDelay=(this.iconAnimationSpeed >>> (i*2)) & 0x03;
+		if(!frameDelay)
+			break;
+
 		if(frameByte===ICON_FORMAT_CI8_UNIQUE_PALETTE){
 			iconFrames.push({formatCI8:true, uniquePalette:true});
 			uniquePaletteOffset+=32 * 32;
@@ -642,6 +678,8 @@ Content.prototype.readIcon=function(){
 			uniquePaletteOffset+=32 * 32 * 2;
 		}
 	}
+	if(!iconFrames.length)
+		return false;
 	if(uniquePalette){
 		uniquePalette=[];
 		for(var i=0; i<0x0100; i++)
@@ -675,21 +713,48 @@ Content.prototype.readIcon=function(){
 
 
 
-
-
-/* define BinaryReader additional methods */
-BinaryReader.prototype.calculateGcXor=function(len, storeAt){
+/* helper functions */
+function calculateGcChecksums(rawData, offset, len){
 	var csum=0x0000;
 	var inv_csum=0x0000;
 	for(var i=0; i<len; i+=2){
-		var u16=this.readU16();
-		csum += (u16 >>> 0) & 0xffff;
-		inv_csum += ((u16 ^ 0xffff)>>>0) & 0xffff;
+		var u16=rawData.readU16At(offset + i);
+		csum=(csum + u16) & 0xffff;
+		inv_csum=(inv_csum + (u16 ^ 0xffff)) & 0xffff;
 	}
 	if(csum===0xffff)
 		csum=0x0000;
 	if(inv_csum===0xffff)
 		inv_csum=0x0000;
+
+	return [csum, inv_csum];
+}
+
+/* GC memcards keep two copies of directory and block allocation map (their update counter is the most recent one) */
+/* this functions returns the offset to themost recent one */
+function getCurrentGcBlockOffset(rawFile, offset, backupOffset, counterOffset, isMap){
+	var isValid=function(blockOffset){
+		var checksumOffset=isMap? blockOffset : blockOffset + RAW_BLOCK_SIZE - 4;
+		var sums=calculateGcChecksums(rawFile, isMap? blockOffset + 4 : blockOffset, RAW_BLOCK_SIZE - 4);
+		return rawFile.readU16At(checksumOffset)===sums[0] && rawFile.readU16At(checksumOffset + 2)===sums[1];
+	}
+	var valid=isValid(offset);
+	var validBackup=isValid(backupOffset);
+	if(valid!==validBackup)
+		return valid? offset : backupOffset;
+
+	//counters are signed 16-bit, block 0 is preferred when equal
+	var counter=(rawFile.readU16At(offset + counterOffset) << 16) >> 16;
+	var counterBackup=(rawFile.readU16At(backupOffset + counterOffset) << 16) >> 16;
+	return counter>=counterBackup? offset : backupOffset;
+}
+
+/* define BinaryReader additional methods */
+BinaryReader.prototype.calculateGcXor=function(len, storeAt){
+	var sums=calculateGcChecksums(this, this.offset, len);
+	var csum=sums[0];
+	var inv_csum=sums[1];
+	this.skip(len);
 
 	if(storeAt){
 		this.writeU16At(storeAt, csum);

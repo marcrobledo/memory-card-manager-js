@@ -17,6 +17,10 @@
 	<script type="text/javascript" src="../core/BinaryFile.js"></script>
 	<script type="text/javascript" src="../core/memcard_manager.js"></script>
 	<script type="text/javascript" src="./gc.js"></script>
+	<script type="text/javascript">
+		if(window.location.protocol==='http:' && window.location.hostname==='www.marcrobledo.com')
+			location.href=window.location.href.replace('http:','https:');
+	</script>
 </head>
 <body class="purple">
 
@@ -31,7 +35,7 @@
 
 <!-- FOOTER -->
 <footer>
-	GameCube Memory Card Manager JS <small class="text-danger" style="font-weight:bold">v0.1</small> by <a href="https://www.marcrobledo.com">Marc Robledo</a>
+	GameCube Memory Card Manager JS <small>v1.0</small> by <a href="https://www.marcrobledo.com">Marc Robledo</a>
 	<br />
 	<a href="https://www.paypal.me/marcrobledo/5" target="_blank" rel="nofollow" class="footer-link footer-link-donate"><img src="../core/assets/octicon_heart.svg" class="octicon" loading="lazy" /> <i class="icon heart"></i> <span data-localize="Donate">Donate</span></a>
 	<a href="https://github.com/marcrobledo/memory-card-manager-js/" target="_blank" class="footer-link footer-link-github"><img src="../core/assets/octicon_github.svg" class="octicon" loading="lazy" /> See on <img src="../core/assets/octicon_github_logo.svg" class="octicon" loading="lazy" alt="GitHub" /></a>
@@ -123,6 +127,11 @@
 	<div class="modal-row" data-localize="Format memory card?">
 		Format memory card?
 	</div>
+	<div class="modal-row">
+		<label><input type="radio" name="format_options" value="59" checked /> 59 blocks</label>
+		<label><input type="radio" name="format_options" value="251" /> 251 blocks</label>
+		<label><input type="radio" name="format_options" value="1019" /> 1019 blocks</label>
+	</div>
 	<div class="modal-footer">
 		<button class="btn btn-cancel" data-localize="Cancel">Cancel</button>
 		<button class="btn btn-danger"><img src="../core/assets/octicon_trash_white.svg" class="octicon" /> <span data-localize="Format">Format</span></button>
@@ -136,18 +145,6 @@
 	<div class="modal-footer">
 		<button class="btn btn-cancel" data-localize="Cancel">Cancel</button>
 		<button class="btn btn-danger"><img src="../core/assets/octicon_trash_white.svg" class="octicon" /> <span data-localize="Delete">Delete</span></button>
-	</div>
-</dialog>
-
-<dialog id="modal-warning" class="modal">
-	<div class="modal-row text-danger">
-		Gamecube support for Memory Card JS is currently partial.<br/>
-		It is not guaranteed the saved files will be successfully read by the console.<br/>
-		<strong>Use it only for testing purposes. Keep always backups of your memory card raw dump files.</strong><br/><br/>
-		<a href="https://github.com/marcrobledo/memory-card-manager-js/" target="_blank">Read why here</a>
-	</div>
-	<div class="modal-footer">
-		<button class="btn btn-cancel" data-localize="Accept">Accept</button>
 	</div>
 </dialog>
 
