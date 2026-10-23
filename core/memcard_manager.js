@@ -76,6 +76,9 @@ var UI=(function(){
 		monoText:function(str){
 			return '<span class="mono">'+str+'</span>';
 		},
+		escapeHtml:function(str){
+			return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+		},
 		getSlotId:function(index){
 			return String.fromCharCode((SYSTEM.slotLetters? 'A' : '1').charCodeAt(0) + index);
 		}
