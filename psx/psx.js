@@ -56,13 +56,6 @@ const PSX_SERIAL_REGIONS_JAP=['SLPS','SLPM','SCPS','SCEI','SCAJ','SIPS','SLKA','
 const PSX_SERIAL_REGIONS_USA=['SLUS','SCUS','SCEA','NPUJ','NPUI','NPUF','LSP'];
 const PSX_SERIAL_REGIONS_EUR=['SLES','SCES','SCEE','SCED','NPEF'];
 
-/* service worker */
-const FORCE_HTTPS=true;
-if(FORCE_HTTPS && location.protocol==='http:')
-	location.href=window.location.href.replace('http:','https:');
-/*else if(location.protocol==='https:' && 'serviceWorker' in navigator)
-	navigator.serviceWorker.register('/memcard_manager/psx/_cache_service_worker.js', {scope: '/memcard_manager/psx/'});*/
-
 
 
 
