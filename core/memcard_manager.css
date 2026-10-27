@@ -194,6 +194,12 @@ footer a:hover{
 	background-color:var(--color-highlight);
 	border-radius:4px;
 }
+.content.copy-protected{
+	background-color: #ffebeb;
+}
+.content.special{
+	background-color: #def6ff;
+}
 .container-icon{
 	width:40px;
 	flex-grow:0;
@@ -226,6 +232,9 @@ canvas{
 	height:32px;
 
 	border-radius:3px;
+}
+canvas.noresize{
+	height:auto;
 }
 
 

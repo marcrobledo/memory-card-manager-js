@@ -707,6 +707,12 @@ Content.prototype.readIcon=function(){
 
 
 
+Content.prototype.getRowStyle=function(){
+	return this.filePermissionsNoCopy || this.filePermissionsNoMove? 'copy-protected' : '';
+}
+
+
+
 
 
 

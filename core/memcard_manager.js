@@ -289,10 +289,10 @@ function refreshHtml(memoryCardIndex){
 		if(content.icon)
 			htmlElement.find('.container-icon').append(content.icon.canvas);
 
-		if(content.deleted)
-			htmlElement.addClass('text-muted');
+		if(typeof content.getRowStyle==='function')
+			htmlElement.get(0).className='content ' + content.getRowStyle();
 		else
-			htmlElement.removeClass('text-muted');
+			htmlElement.get(0).className='content';
 	}
 }
 

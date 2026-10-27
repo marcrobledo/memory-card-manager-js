@@ -7,7 +7,7 @@
 *
 * MIT License
 * 
-* Copyright (c) 2019-2025 Marc Robledo
+* Copyright (c) 2019-2026 Marc Robledo
 * 
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -458,7 +458,9 @@ Content.prototype.readIcon=function(numFrames){
 
 
 
-
+Content.prototype.getRowStyle=function(){
+	return this.deleted? 'text-muted' : '';
+}
 
 
 
