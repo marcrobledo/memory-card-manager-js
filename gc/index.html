@@ -37,7 +37,7 @@
 <footer>
 	GameCube Memory Card Manager JS <small>v1.0</small> by <a href="https://www.marcrobledo.com">Marc Robledo</a>
 	<br />
-	<a href="https://www.paypal.me/marcrobledo/5" target="_blank" rel="nofollow" class="footer-link footer-link-donate"><img src="../core/assets/octicon_heart.svg" class="octicon" loading="lazy" /> <i class="icon heart"></i> <span data-localize="Donate">Donate</span></a>
+	<a href="https://www.paypal.me/marcrobledo/5" target="_blank" rel="nofollow" class="footer-link footer-link-donate"><img src="../core/assets/octicon_heart.svg" class="octicon" loading="lazy" /> <i class="icon heart"></i> <span data-localize="*">Donate</span></a>
 	<a href="https://github.com/marcrobledo/memory-card-manager-js/" target="_blank" class="footer-link footer-link-github"><img src="../core/assets/octicon_github.svg" class="octicon" loading="lazy" /> See on <img src="../core/assets/octicon_github_logo.svg" class="octicon" loading="lazy" alt="GitHub" /></a>
 </footer>
 
@@ -45,8 +45,8 @@
 
 
 
-<div id="template-memcard" class="memcard hide">
-	<h2><span data-localize="Slot">Slot</span> <span class="memcard-slot"></span></h2>
+<div id="template-memcard" class="memcard" hidden>
+	<h2><span data-localize="*">Slot</span> <span class="memcard-slot"></span></h2>
 
 	<div class="container-toolbar">
 		<div class="container-info">
@@ -55,14 +55,14 @@
 		</div>
 
 		<div class="container-menu">
-			<button class="btn btn-save btn-primary"><img src="../core/assets/octicon_download_white.svg" class="octicon" /> <span data-localize="Save">Save</span> .raw</button>
+			<button class="btn btn-save btn-primary"><img src="../core/assets/octicon_download_white.svg" class="octicon" /> <span data-localize="*">Save</span> .raw</button>
 			<button class="btn btn-more"><img src="../core/assets/octicon_kebab.svg" class="octicon" /></button>
 		</div>
 	</div>
 	<div class="contents"></div>
 </div>
 
-<div id="template-content" class="content hide">
+<div id="template-content" class="content" hidden>
 	<div class="container-icon"></div>
 	<div class="container-info">
 		<div class="container-name text-truncate"></div>
@@ -77,16 +77,16 @@
 
 
 <ul id="dropdown-memcard" class="dropdown hide">
-	<li><button id="btn-memcard-load"><img src="../core/assets/octicon_upload.svg" class="octicon" /> <span data-localize="Load">Load</span> .raw/.gci</button></li>
-	<li><button id="btn-memcard-format" class="text-danger"><img src="../core/assets/octicon_trash.svg" class="octicon" /> <span data-localize="Format">Format</span></button></li>
+	<li><button id="btn-memcard-load"><img src="../core/assets/octicon_upload.svg" class="octicon" /> <span data-localize="*">Load</span> .raw/.gci</button></li>
+	<li><button id="btn-memcard-format" class="text-danger"><img src="../core/assets/octicon_trash.svg" class="octicon" /> <span data-localize="*">Format</span></button></li>
 </ul>
 			
 <ul id="dropdown-content" class="dropdown hide">
-	<li><button id="btn-content-save"><img src="../core/assets/octicon_download.svg" class="octicon" /> <span data-localize="Save">Save</span> .gci</button></li>
-	<li><button id="btn-content-copy-next"><img src="../core/assets/octicon_package_dependents.svg" class="octicon" /> <span data-localize="Copy to slot">Copy to slot</span> <span id="btn-content-copy-slot-next"></span></button></li>
-	<li><button id="btn-content-copy-prev"><img src="../core/assets/octicon_package_dependencies.svg" class="octicon" /> <span data-localize="Copy to slot">Copy to slot</span> <span id="btn-content-copy-slot-prev"></span></button></li>
-	<li><button id="btn-content-edit"><img src="../core/assets/octicon_pencil.svg" class="octicon" /> <span data-localize="Edit">Edit</span></button></li>
-	<li><button id="btn-content-delete" class="text-danger"><img src="../core/assets/octicon_trash.svg" class="octicon" /> <span data-localize="Delete">Delete</span></button></li>
+	<li><button id="btn-content-save"><img src="../core/assets/octicon_download.svg" class="octicon" /> <span data-localize="*">Save</span> .gci</button></li>
+	<li><button id="btn-content-copy-next"><img src="../core/assets/octicon_package_dependents.svg" class="octicon" /> <span data-localize="*">Copy to slot</span> <span id="btn-content-copy-slot-next"></span></button></li>
+	<li><button id="btn-content-copy-prev"><img src="../core/assets/octicon_package_dependencies.svg" class="octicon" /> <span data-localize="*">Copy to slot</span> <span id="btn-content-copy-slot-prev"></span></button></li>
+	<li><button id="btn-content-edit"><img src="../core/assets/octicon_pencil.svg" class="octicon" /> <span data-localize="*">Edit</span></button></li>
+	<li><button id="btn-content-delete" class="text-danger"><img src="../core/assets/octicon_trash.svg" class="octicon" /> <span data-localize="*">Delete</span></button></li>
 </ul>
 
 
@@ -97,34 +97,34 @@
 		<canvas id="modal-content-banner" width="96" height="32"></canvas>
 	</div>
 	<div class="modal-row">
-		<span data-localize="Updated">Updated</span>: <span id="modal-content-updateTimestamp"></span><br/>
-		<span data-localize="Copy count">Copy count</span>: <span id="modal-content-copyCounter"></span>
+		<span data-localize="*">Updated</span>: <span id="modal-content-updateTimestamp"></span><br/>
+		<span data-localize="*">Copy count</span>: <span id="modal-content-copyCounter"></span>
 	</div>
 	<div class="modal-row">
-		<label for="modal-content-fileName" data-localize="File name">File name</label>
+		<label for="modal-content-fileName" data-localize="*">File name</label>
 		<input type="text" id="modal-content-fileName" maxlength="32" />
 	</div>
 	<div class="modal-row">
-		<label for="modal-content-gameCode" data-localize="Game code">Game code</label>
+		<label for="modal-content-gameCode" data-localize="*">Game code</label>
 		<input type="text" id="modal-content-gameCode" maxlength="4" />
 	</div>
 	<div class="modal-row">
-		<label for="modal-content-makerCode" data-localize="Maker code">Maker code</label>
+		<label for="modal-content-makerCode" data-localize="*">Maker code</label>
 		<input type="text" id="modal-content-makerCode" maxlength="2" />
 	</div>
 	<div class="modal-row">
-		<label for="modal-content-filePermissionsPublic"><input type="checkbox" id="modal-content-filePermissionsPublic" /> <span data-localize="Can be read by any game">Can be read by any game</span></label><br/>
-		<label for="modal-content-filePermissionsNoCopy"><input type="checkbox" id="modal-content-filePermissionsNoCopy" /> <span data-localize="Copy protected">Copy protected</span></label><br/>
-		<label for="modal-content-filePermissionsNoMove"><input type="checkbox" id="modal-content-filePermissionsNoMove" /> <span data-localize="Move protected">Move protected</span></label>		
+		<label for="modal-content-filePermissionsPublic"><input type="checkbox" id="modal-content-filePermissionsPublic" /> <span data-localize="*">Can be read by any game</span></label><br/>
+		<label for="modal-content-filePermissionsNoCopy"><input type="checkbox" id="modal-content-filePermissionsNoCopy" /> <span data-localize="*">Copy protected</span></label><br/>
+		<label for="modal-content-filePermissionsNoMove"><input type="checkbox" id="modal-content-filePermissionsNoMove" /> <span data-localize="*">Move protected</span></label>		
 	</div>
 	<div class="modal-footer">
-		<button class="btn btn-cancel" data-localize="Cancel">Cancel</button>
-		<button class="btn btn-primary"><img src="../core/assets/octicon_check_white.svg" class="octicon" /> <span data-localize="Save">Save</span></button>
+		<button class="btn btn-cancel" data-localize="*">Cancel</button>
+		<button class="btn btn-primary"><img src="../core/assets/octicon_check_white.svg" class="octicon" /> <span data-localize="*">Save</span></button>
 	</div>
 </dialog>
 
 <dialog id="modal-format" class="modal">
-	<div class="modal-row" data-localize="Format memory card?">
+	<div class="modal-row" data-localize="*">
 		Format memory card?
 	</div>
 	<div class="modal-row">
@@ -133,18 +133,18 @@
 		<label><input type="radio" name="format_options" value="1019" /> 1019 blocks</label>
 	</div>
 	<div class="modal-footer">
-		<button class="btn btn-cancel" data-localize="Cancel">Cancel</button>
-		<button class="btn btn-danger"><img src="../core/assets/octicon_trash_white.svg" class="octicon" /> <span data-localize="Format">Format</span></button>
+		<button class="btn btn-cancel" data-localize="*">Cancel</button>
+		<button class="btn btn-danger"><img src="../core/assets/octicon_trash_white.svg" class="octicon" /> <span data-localize="*">Format</span></button>
 	</div>
 </dialog>
 
 <dialog id="modal-content-delete" class="modal">
-	<div class="modal-row" data-localize="Delete content?">
+	<div class="modal-row" data-localize="*">
 		Delete content?
 	</div>
 	<div class="modal-footer">
-		<button class="btn btn-cancel" data-localize="Cancel">Cancel</button>
-		<button class="btn btn-danger"><img src="../core/assets/octicon_trash_white.svg" class="octicon" /> <span data-localize="Delete">Delete</span></button>
+		<button class="btn btn-cancel" data-localize="*">Cancel</button>
+		<button class="btn btn-danger"><img src="../core/assets/octicon_trash_white.svg" class="octicon" /> <span data-localize="*">Delete</span></button>
 	</div>
 </dialog>
 

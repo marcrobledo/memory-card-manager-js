@@ -49,13 +49,10 @@ var L10n=(function(){
 
 		var translatableElements=container.querySelectorAll('*[data-localize]');
 		for(var i=0; i<translatableElements.length; i++){
-			translatableElements[i].innerHTML=_(translatableElements[i].dataset.localize);
+			var textToTranslate=translatableElements[i].dataset.localize==='*'? translatableElements[i].innerText : translatableElements[i].dataset.localize;
+			translatableElements[i].innerText=_(textToTranslate.trim());
 		}
 	}
-
-	window.addEventListener('load', function(){
-		_translateElements(document.body);
-	});
 
 	return{
 		_:function(str){

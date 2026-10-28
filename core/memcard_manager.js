@@ -180,7 +180,7 @@ function newMemoryCard(){
 
 function buildHtml(memoryCardIndex){
 
-	var htmlElement=$('#template-memcard').clone().removeClass('hide').prop('id','memcard-'+memoryCardIndex).appendTo('#memcards');
+	var htmlElement=$('#template-memcard').clone().removeAttr('hidden').prop('id','memcard-'+memoryCardIndex).appendTo('#memcards');
 
 	htmlElement.on('drop', function(evt){
 		evt.preventDefault();
@@ -250,7 +250,7 @@ function refreshHtml(memoryCardIndex){
 		var content=memoryCard.content[i];
 		
 		if(!content.htmlElement){
-			content.htmlElement=templateContent.clone().get(0);
+			content.htmlElement=templateContent.clone().removeAttr('hidden').get(0);
 			$(content.htmlElement).find('.btn-more').on('click', [memoryCard, content], function(evt){
 				evt.stopPropagation();
 				currentMemoryCard=evt.data[0];
@@ -323,8 +323,10 @@ function refreshHtml(memoryCardIndex){
 
 
 /* initialize app */
-$(document).ready(function(){	
-	templateContent=$('#template-content').prop('id','').removeClass('hide').remove();
+$(document).ready(function(){
+	L10n.translateElements(document.body);
+
+	templateContent=$('#template-content').prop('id','').remove();
 	dropdownContent=document.getElementById('dropdown-content');
 
 	newMemoryCard();
@@ -414,10 +416,15 @@ $(document).ready(function(){
 				elem.html(currentContent[SYSTEM.infoFields[i]])
 		}
 
-		$('#modal-content').find('input, select').data('changed', false);
+		$('#modal-content').find('input, select, canvas').data('changed', false);
 		for(var i=0; i<SYSTEM.editableFields.length; i++){
 			var elem=$('#modal-content-'+SYSTEM.editableFields[i]);
-			if(elem.prop('type')==='checkbox')
+			if(elem.prop('tagName')==='CANVAS')
+				if(currentContent[SYSTEM.editableFields[i]])
+					elem.get(0).getContext('2d').putImageData(currentContent[SYSTEM.editableFields[i]], 0, 0);
+				else
+					elem.get(0).getContext('2d').clearRect(0, 0, elem.get(0).width, elem.get(0).height);
+			else if(elem.prop('type')==='checkbox')
 				elem.prop('checked', currentContent[SYSTEM.editableFields[i]]);
 			else
 				elem.val(currentContent[SYSTEM.editableFields[i]]);
@@ -455,7 +462,10 @@ $(document).ready(function(){
 				
 				if(elem.data('changed')){
 					var newValue;
-					if(elem.prop('type')==='checkbox')
+					if(elem.prop('tagName')==='CANVAS'){
+						var canvas=elem.get(0);
+						newValue=canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
+					}else if(elem.prop('type')==='checkbox')
 						newValue=elem.prop('checked');
 					else
 						newValue=elem.val();
