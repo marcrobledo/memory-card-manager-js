@@ -80,13 +80,19 @@ const HEADER_ICON_PALETTE=0x60;
 const HEADER_ICON_BITMAPS=0x80;
 const ICON_SIZE=32;
 const ICON_BYTES=ICON_SIZE * ICON_SIZE / 2;
-const MAX_ICONS=3;
+
 const EYECATCH_WIDTH=72;
 const EYECATCH_HEIGHT=56;
-const EYECATCH_NONE=0;
-const EYECATCH_ARGB4444=1;
-const EYECATCH_PALETTE_256=2;
-const EYECATCH_PALETTE_16=3;
+const EYECATCH_NONE=0x00;
+const EYECATCH_ARGB4444=0x01;
+const EYECATCH_PALETTE_256=0x02;
+const EYECATCH_PALETTE_16=0x03;
+
+const VMU_ICON_FILENAME='ICONDATA_VMS';
+const VMU_ICON_OFFSET_MONOCHROME=0x10;
+const VMU_ICON_OFFSET_COLOR=0x14;
+const VMU_ICON_MONOCHROME_LENGTH=32 * 32 / 8;
+const VMU_ICON_COLOR_LENGTH=32 + ICON_BYTES;
 
 
 
@@ -105,11 +111,111 @@ const SYSTEM={
 	],
 	editableFields:[
 		'fileName',
-		'copyProtected'
+		'copyProtected',
+		'vmuIconColor',
+		'vmuIconMono'
 	]
 }
 
+window.addEventListener('DOMContentLoaded', function(){
+	document.getElementById('btn-content-edit').addEventListener('click', function(){
+		document.getElementById('modal-content-row-eyecatch').classList.toggle('hide', !currentContent.eyecatch);
+		document.getElementById('modal-content-row-vmu-icons').classList.toggle('hide', !currentContent.isVMUIcon());
+	});
 
+
+
+	function bindVMUIconButton(buttonId){
+		var input=document.getElementById('input-file-vmu-icon-' + buttonId);
+		input.addEventListener('change', function(){
+			var file=this.files[0];
+			this.value='';
+			if(!file || !currentContent || !currentContent.isVMUIcon())
+				return;
+
+			var url=URL.createObjectURL(file);
+			var img=new Image();
+			img.onerror=function(){
+				URL.revokeObjectURL(url);
+				alert('Invalid PNG image');
+			};
+			img.onload=function(){
+				URL.revokeObjectURL(url);
+				if(file.type!=='image/png'){
+					alert('Invalid PNG image');
+					return;
+				}
+				if(img.naturalWidth!==ICON_SIZE || img.naturalHeight!==ICON_SIZE){
+					alert('Image must be '+ICON_SIZE+'x'+ICON_SIZE+' pixels');
+					return;
+				}
+
+
+
+
+
+				var canvas=document.createElement('canvas');
+				canvas.width=ICON_SIZE;
+				canvas.height=ICON_SIZE;
+				var ctx=canvas.getContext('2d', {willReadFrequently:true});
+				ctx.drawImage(img, 0, 0);
+				var imageData=ctx.getImageData(0, 0, ICON_SIZE, ICON_SIZE);
+				var colors=[];
+				var readIndex=0;
+				for(var y=0; y<ICON_SIZE; y++){
+					for(var x=0; x<ICON_SIZE; x++){
+						var r=imageData.data[readIndex + 0];
+						var g=imageData.data[readIndex + 1];
+						var b=imageData.data[readIndex + 2];
+						var a=imageData.data[readIndex + 3];
+						readIndex+=4;
+
+						if(buttonId==='mono'){
+							var alpha=a / 255;
+							var luma=(0.299 * r + 0.587 * g + 0.114 * b) * alpha + 255 * (1 - alpha);
+							if(luma<128){
+								r=g=b=0;
+							}else{
+								r=g=b=255;
+							}
+							a=255;
+						}
+
+						//check if color exists in the array
+						var exists=colors.some(function(c){
+							return c[0]===r && c[1]===g && c[2]===b && c[3]===a;
+						});
+						if(!exists){
+							colors.push([r, g, b, a]);
+							if(buttonId==='color' && colors.length>16){
+								alert('Icon image contains more than 16 colors');
+								return;
+							}else if(buttonId==='mono' && colors.length>2){
+								alert('Monochrome icon image contains more than 2 colors');
+								return;
+							}
+						}
+					}
+				}
+
+				var finalCanvas=$('#modal-content-vmuIcon' + (buttonId==='mono'? 'Mono' : 'Color'));
+				finalCanvas.data('changed', true);
+				var ctx2=finalCanvas.get(0).getContext('2d');
+				ctx2.clearRect(0, 0, canvas.width, canvas.height);
+				ctx2.putImageData(imageData, 0, 0);
+				refreshHtml(currentMemoryCard);
+			};
+			img.src=url;
+		});
+		var button=document.getElementById('btn-vmu-icon-' + buttonId);
+		button.addEventListener('click', function(){
+			input.click();
+		});
+	}
+
+	bindVMUIconButton('mono');
+	bindVMUIconButton('color');
+});
 
 
 
@@ -335,10 +441,14 @@ function Content(arrayBuffer){
 	var headerOffset=DIRECTORY_ENTRY_SIZE + this.headerOffset * BLOCK_SIZE;
 	this.comment1='';
 	this.comment2='';
-	if(headerOffset + HEADER_ICON_BITMAPS <= this._rawData.size){
+
+	this.readIcon(headerOffset);
+	if(this.isVMUIcon()){
+		//ICONDATA_VMS uses a special structure, overwriting some header bytes like comment2 and eyecatch
+		this.comment1=UI.escapeHTML(Content.readText(this._rawData, DIRECTORY_ENTRY_SIZE + HEADER_DESCRIPTION_SHORT, 16));
+	}else if(headerOffset + HEADER_ICON_BITMAPS <= this._rawData.size){
 		this.comment1=UI.escapeHTML(Content.readText(this._rawData, headerOffset + HEADER_DESCRIPTION_SHORT, 16));
 		this.comment2=UI.escapeHTML(Content.readText(this._rawData, headerOffset + HEADER_DESCRIPTION_LONG, 32));
-		this.readIcon(headerOffset);
 	}
 }
 Content.fromArrayBuffer=function(arrayBuffer){
@@ -389,12 +499,12 @@ Content.readText=function(rawData, offset, len){
 	}
 	return str.replace(/\0/g, '').trim();
 }
-Content.convertColor=function(argb4444){
+Content.convertColor=function(argb4444, keepAlpha){
 	return [
 		((argb4444 >>> 8) & 0x0f) * 17,
 		((argb4444 >>> 4) & 0x0f) * 17,
 		(argb4444 & 0x0f) * 17,
-		255
+		keepAlpha? ((argb4444 >>> 12) & 0x0f) * 17 : 255
 	];
 }
 Content.paletteToImageData=function(width, height, getPaletteIndex, palette){
@@ -446,33 +556,37 @@ Content.prototype.setCopyProtected=function(copyProtected){
 }
 
 Content.prototype.readIcon=function(headerOffset){
+	if(this.isVMUIcon())
+		return this.parseVMUIcons();
+
 	var iconCount=this._rawData.readU16At(headerOffset + HEADER_ICON_COUNT);
 	var iconSpeed=this._rawData.readU16At(headerOffset + HEADER_ICON_SPEED);
 	var eyecatchType=this._rawData.readU16At(headerOffset + HEADER_EYECATCH_TYPE);
 
 	var iconsOffset=headerOffset + HEADER_ICON_BITMAPS;
 	var eyecatchOffset=iconsOffset + iconCount * ICON_BYTES;
-	if(iconCount<1 || iconCount>MAX_ICONS || eyecatchOffset>this._rawData.size)
+	if(eyecatchOffset>this._rawData.size)
 		return false;
 
-	var palette=[];
-	for(var i=0; i<16; i++)
-		palette.push(Content.convertColor(this._rawData.readU16At(headerOffset + HEADER_ICON_PALETTE + i * 2)));
+	if(iconCount>0){
+		var palette=[];
+		for(var i=0; i<16; i++)
+			palette.push(Content.convertColor(this._rawData.readU16At(headerOffset + HEADER_ICON_PALETTE + i * 2)));
 
-	var iconImageDatas=[];
-	for(var i=0; i<iconCount; i++){
-		var bitmapOffset=iconsOffset + i * ICON_BYTES;
-		iconImageDatas.push(Content.paletteToImageData(ICON_SIZE, ICON_SIZE, (function(offset, rawData){
-			return function(p){
-				var b=rawData.readU8At(offset + (p >> 1));
-				return (p & 1)? (b & 0x0f) : (b >> 4);
-			}
-		}(bitmapOffset, this._rawData)), palette));
+		var iconImageDatas=[];
+		for(var i=0; i<iconCount; i++){
+			var bitmapOffset=iconsOffset + i * ICON_BYTES;
+			iconImageDatas.push(Content.paletteToImageData(ICON_SIZE, ICON_SIZE, (function(offset, rawData){
+				return function(p){
+					var b=rawData.readU8At(offset + (p >> 1));
+					return (p & 1)? (b & 0x0f) : (b >> 4);
+				}
+			}(bitmapOffset, this._rawData)), palette));
+		}
+		this.icon=new ContentIcon(iconImageDatas);
+		if(iconSpeed)
+			this.icon.speed=Math.min(iconSpeed, 120) * 2; //speed is in 1/30s, animation loop runs at 60fps
 	}
-	this.icon=new ContentIcon(iconImageDatas);
-	if(iconSpeed)
-		this.icon.speed=Math.min(iconSpeed, 120) * 2; //speed is in 1/30s, animation loop runs at 60fps
-
 	var rawData=this._rawData;
 	var pixels=EYECATCH_WIDTH * EYECATCH_HEIGHT;
 	if(eyecatchType===EYECATCH_ARGB4444 && eyecatchOffset + pixels * 2 <= rawData.size){
@@ -498,7 +612,132 @@ Content.prototype.readIcon=function(headerOffset){
 		}, palette16);
 	}
 
-	return true;
+	return this.icon || this.eyecatch;
+}
+Content.prototype.isVMUIcon=function(){
+	return this.fileType===FILE_TYPE_DATA && this.fileName===VMU_ICON_FILENAME;
+}
+Content.prototype.parseVMUIcons=function(){
+	var rawData=this._rawData;
+	var base=DIRECTORY_ENTRY_SIZE;
+	var monoOffset=rawData.readU32At(base + VMU_ICON_OFFSET_MONOCHROME);
+	var colorOffset=rawData.readU32At(base + VMU_ICON_OFFSET_COLOR);
+	var white=[255, 255, 255, 255], black=[0, 0, 0, 255];
+
+	if(monoOffset>0 && base + monoOffset + VMU_ICON_MONOCHROME_LENGTH <= rawData.size){
+		this.vmuIconMono=Content.paletteToImageData(ICON_SIZE, ICON_SIZE, function(p){
+			return (rawData.readU8At(base + monoOffset + (p >> 3)) >> (7 - (p & 7))) & 1;
+		}, [white, black]);
+	}
+
+	if(colorOffset>0 && base + colorOffset + VMU_ICON_COLOR_LENGTH <= rawData.size){
+		var palette=[];
+		for(var i=0; i<16; i++)
+			palette.push(Content.convertColor(rawData.readU16At(base + colorOffset + i * 2), true));
+		this.vmuIconColor=Content.paletteToImageData(ICON_SIZE, ICON_SIZE, function(p){
+			var b=rawData.readU8At(base + colorOffset + 32 + (p >> 1));
+			return (p & 1)? (b & 0x0f) : (b >> 4);
+		}, palette);
+	}
+
+	var vmuIcon=this.vmuIconColor || this.vmuIconMono;
+	if(vmuIcon){
+		if(this.icon){
+			this.icon.imageDatas=[vmuIcon];
+			this.icon.frame=0;
+			this.icon.ctx.putImageData(vmuIcon, 0, 0);
+		}else{
+			this.icon=new ContentIcon([vmuIcon]);
+		}
+	}
+
+	return this.icon;
+}
+Content.prototype.setVmuIconColor=function(imageData){
+	if(!this.isVMUIcon())
+		throw new Error('No VMU icon to replace.');
+
+	var palette=[];
+	var pixels=[];
+
+	for(var i=0; i<imageData.data.length; i+=4){
+		var r=imageData.data[i + 0];
+		var g=imageData.data[i + 1];
+		var b=imageData.data[i + 2];
+		var a=imageData.data[i + 3];
+
+		var argb4444=Math.round(a / 17)? ((Math.round(a / 17) << 12) | (Math.round(r / 17) << 8) | (Math.round(g / 17) << 4) | Math.round(b / 17)) : 0;
+		var index=palette.indexOf(argb4444);
+		if(index===-1){
+			index=palette.length;
+			palette.push(argb4444);
+		}
+		pixels.push(index);
+	}
+
+
+	var rawData=this._rawData;
+	var base=DIRECTORY_ENTRY_SIZE;
+
+	if(palette.length>16)
+		throw new Error('VMU Icon Color has more than 16 colors.');
+
+	//the color icon is added if the file doesn't have one
+	var monoOffset=rawData.readU32At(base + VMU_ICON_OFFSET_MONOCHROME);
+	var offset=rawData.readU32At(base + VMU_ICON_OFFSET_COLOR)  || (monoOffset + VMU_ICON_MONOCHROME_LENGTH);
+	if(base + offset + VMU_ICON_COLOR_LENGTH>rawData.size)
+		throw new Error('ICONDATA_VMS file has no room for a color icon.');
+
+	rawData.writeU32At(base + VMU_ICON_OFFSET_COLOR, offset);
+	for(var i=0; i<16; i++)
+		rawData.writeU16At(base + offset + i * 2, palette[i] || 0);
+	for(var i=0; i<ICON_BYTES; i++)
+		rawData.writeU8At(base + offset + 32 + i, (pixels[i * 2] << 4) | pixels[i * 2 + 1]);
+
+	this.parseVMUIcons();
+}
+Content.prototype.setVmuIconMono=function(imageData){
+	if(!this.isVMUIcon())
+		throw new Error('No VMU icon to replace.');
+
+	var pixels=[];
+
+	for(var i=0; i<imageData.data.length; i+=4){
+		var r=imageData.data[i + 0];
+		var g=imageData.data[i + 1];
+		var b=imageData.data[i + 2];
+		var a=imageData.data[i + 3];
+
+		var alpha=a / 255;
+		var luma=(0.299 * r + 0.587 * g + 0.114 * b) * alpha + 255 * (1 - alpha);
+		pixels.push(luma<128);
+	}
+
+
+	var rawData=this._rawData;
+	var base=DIRECTORY_ENTRY_SIZE;
+	var offset=rawData.readU32At(base + VMU_ICON_OFFSET_MONOCHROME);
+	if(offset<1 || base + offset + VMU_ICON_MONOCHROME_LENGTH>rawData.size)
+		throw new Error('Invalid ICONDATA_VMS file.');
+
+	for(var i=0; i<VMU_ICON_MONOCHROME_LENGTH; i++)
+		rawData.writeU8At(base + offset + i, 0x00);
+	for(var i=0; i<pixels.length; i++){
+		if(pixels[i])
+			rawData.writeU8At(base + offset + (i >> 3), rawData.readU8At(base + offset + (i >> 3)) | (0x80 >> (i & 7)));
+	}
+
+	this.parseVMUIcons();
+}
+
+
+
+Content.prototype.getRowStyle=function(){
+	if(this.copyProtected)
+		return 'copy-protected';
+	if(this.isVMUIcon())
+		return 'special';
+	return '';
 }
 
 
