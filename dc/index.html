@@ -104,6 +104,10 @@
 		<input type="file" id="input-file-vmu-icon-color" accept="image/png" class="hide" />
 		<input type="file" id="input-file-vmu-icon-mono" accept="image/png" class="hide" />
 	</div>
+	<div class="modal-row" id="modal-content-row-background">
+		<button id="btn-background" class="btn"><canvas id="modal-content-background" class="noresize" width="256" height="256"></canvas></button>
+		<input type="file" id="input-file-background" accept="image/png" class="hide" />
+	</div>
 	<div class="modal-row">
 		<span data-localize="*">Updated</span>: <span id="modal-content-updateTimestamp"></span><br/>
 		<span data-localize="*">Type</span>: <span id="modal-content-fileTypeName"></span>
@@ -115,8 +119,11 @@
 	<div class="modal-row">
 		<label for="modal-content-copyProtected"><input type="checkbox" id="modal-content-copyProtected" /> <span data-localize="*">Copy protected</span></label>
 	</div>
+	<div class="modal-row" id="modal-content-row-real-mode">
+		<label for="modal-content-realMode"><input type="checkbox" id="modal-content-realMode" /> <span data-localize="*">Enable dashboard 'Real mode'</span></label>
+	</div>
 	<div class="modal-footer">
-		<button class="btn btn-cancel" data-localize="*">Cancel</button>
+		<button class="btn btn-cancel" commandfor="modal-content" command="close" data-localize="*">Cancel</button>
 		<button class="btn btn-primary"><img src="../core/assets/octicon_check_white.svg" class="octicon" /> <span data-localize="*">Save</span></button>
 	</div>
 </dialog>
@@ -126,7 +133,7 @@
 		Format memory card?
 	</div>
 	<div class="modal-footer">
-		<button class="btn btn-cancel" data-localize="*">Cancel</button>
+		<button class="btn btn-cancel" commandfor="modal-format" command="close" data-localize="*">Cancel</button>
 		<button class="btn btn-danger"><img src="../core/assets/octicon_trash_white.svg" class="octicon" /> <span data-localize="*">Format</span></button>
 	</div>
 </dialog>
@@ -136,7 +143,7 @@
 		Delete content?
 	</div>
 	<div class="modal-footer">
-		<button class="btn btn-cancel" data-localize="*">Cancel</button>
+		<button class="btn btn-cancel" commandfor="modal-content-delete" command="close" data-localize="*">Cancel</button>
 		<button class="btn btn-danger"><img src="../core/assets/octicon_trash_white.svg" class="octicon" /> <span data-localize="*">Delete</span></button>
 	</div>
 </dialog>

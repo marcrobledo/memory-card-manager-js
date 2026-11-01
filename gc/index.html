@@ -118,7 +118,7 @@
 		<label for="modal-content-filePermissionsNoMove"><input type="checkbox" id="modal-content-filePermissionsNoMove" /> <span data-localize="*">Move protected</span></label>		
 	</div>
 	<div class="modal-footer">
-		<button class="btn btn-cancel" data-localize="*">Cancel</button>
+		<button class="btn btn-cancel" commandfor="modal-content" command="close" data-localize="*">Cancel</button>
 		<button class="btn btn-primary"><img src="../core/assets/octicon_check_white.svg" class="octicon" /> <span data-localize="*">Save</span></button>
 	</div>
 </dialog>
@@ -133,7 +133,7 @@
 		<label><input type="radio" name="format_options" value="1019" /> 1019 blocks</label>
 	</div>
 	<div class="modal-footer">
-		<button class="btn btn-cancel" data-localize="*">Cancel</button>
+		<button class="btn btn-cancel" commandfor="modal-format" command="close" data-localize="*">Cancel</button>
 		<button class="btn btn-danger"><img src="../core/assets/octicon_trash_white.svg" class="octicon" /> <span data-localize="*">Format</span></button>
 	</div>
 </dialog>
@@ -143,7 +143,7 @@
 		Delete content?
 	</div>
 	<div class="modal-footer">
-		<button class="btn btn-cancel" data-localize="*">Cancel</button>
+		<button class="btn btn-cancel" commandfor="modal-content-delete" command="close" data-localize="*">Cancel</button>
 		<button class="btn btn-danger"><img src="../core/assets/octicon_trash_white.svg" class="octicon" /> <span data-localize="*">Delete</span></button>
 	</div>
 </dialog>

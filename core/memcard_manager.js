@@ -431,15 +431,6 @@ $(document).ready(function(){
 		}
 		document.getElementById('modal-content').showModal();
 	});
-	$('#modal-content .btn-cancel').on('click', function(evt){
-		document.getElementById('modal-content').close();
-	});
-	$('#modal-format .btn-cancel').on('click', function(evt){
-		document.getElementById('modal-format').close();
-	});
-	$('#modal-content-delete .btn-cancel').on('click', function(evt){
-		document.getElementById('modal-content-delete').close();
-	});
 	$('#modal-content .btn-primary').on('click', function(evt){
 		document.getElementById('modal-content').close(1);
 	});

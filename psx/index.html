@@ -114,7 +114,7 @@
 		<label for="modal-content-deleted"><input type="checkbox" id="modal-content-deleted" /> <span data-localize="*">Deleted</span></label>		
 	</div>
 	<div class="modal-footer">
-		<button class="btn btn-cancel" data-localize="*">Cancel</button>
+		<button class="btn btn-cancel" commandfor="modal-content" command="close" data-localize="*">Cancel</button>
 		<button class="btn btn-primary"><img src="../core/assets/octicon_check_white.svg" class="octicon" /> <span data-localize="*">Save</span></button>
 	</div>
 </dialog>
@@ -124,7 +124,7 @@
 		Format memory card?
 	</div>
 	<div class="modal-footer">
-		<button class="btn btn-cancel" data-localize="*">Cancel</button>
+		<button class="btn btn-cancel" commandfor="modal-format" command="close" data-localize="*">Cancel</button>
 		<button class="btn btn-danger"><img src="../core/assets/octicon_trash_white.svg" class="octicon" /> <span data-localize="*">Format</span></button>
 	</div>
 </dialog>
@@ -134,7 +134,7 @@
 		Delete content?
 	</div>
 	<div class="modal-footer">
-		<button class="btn btn-cancel" data-localize="*">Cancel</button>
+		<button class="btn btn-cancel" commandfor="modal-content-delete" command="close" data-localize="*">Cancel</button>
 		<button class="btn btn-danger"><img src="../core/assets/octicon_trash_white.svg" class="octicon" /> <span data-localize="*">Delete</span></button>
 	</div>
 </dialog>

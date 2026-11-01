@@ -35,7 +35,7 @@
 
 <!-- FOOTER -->
 <footer>
-	Sega Saturn Memory Card Manager JS <small>v0.9</small> by <a href="https://www.marcrobledo.com">Marc Robledo</a>
+	Sega Saturn Memory Card Manager JS <small>v1.0</small> by <a href="https://www.marcrobledo.com">Marc Robledo</a>
 	<br />
 	<a href="https://www.paypal.me/marcrobledo/5" target="_blank" rel="nofollow" class="footer-link footer-link-donate"><img src="../core/assets/octicon_heart.svg" class="octicon" loading="lazy" /> <i class="icon heart"></i> <span data-localize="*">Donate</span></a>
 	<a href="https://github.com/marcrobledo/memory-card-manager-js/" target="_blank" class="footer-link footer-link-github"><img src="../core/assets/octicon_github.svg" class="octicon" loading="lazy" /> See on <img src="../core/assets/octicon_github_logo.svg" class="octicon" loading="lazy" alt="GitHub" /></a>
@@ -115,7 +115,7 @@
 		</select>
 	</div>
 	<div class="modal-footer">
-		<button class="btn btn-cancel" data-localize="*">Cancel</button>
+		<button class="btn btn-cancel" commandfor="modal-content" command="close" data-localize="*">Cancel</button>
 		<button class="btn btn-primary"><img src="../core/assets/octicon_check_white.svg" class="octicon" /> <span data-localize="*">Save</span></button>
 	</div>
 </dialog>
@@ -129,7 +129,7 @@
 		<label><input type="radio" name="format_options" value="cart" /> Backup RAM cart (512 KB)</label>
 	</div>
 	<div class="modal-footer">
-		<button class="btn btn-cancel" data-localize="*">Cancel</button>
+		<button class="btn btn-cancel" commandfor="modal-format" command="close" data-localize="*">Cancel</button>
 		<button class="btn btn-danger"><img src="../core/assets/octicon_trash_white.svg" class="octicon" /> <span data-localize="*">Format</span></button>
 	</div>
 </dialog>
@@ -139,7 +139,7 @@
 		Delete content?
 	</div>
 	<div class="modal-footer">
-		<button class="btn btn-cancel" data-localize="*">Cancel</button>
+		<button class="btn btn-cancel" commandfor="modal-content-delete" command="close" data-localize="*">Cancel</button>
 		<button class="btn btn-danger"><img src="../core/assets/octicon_trash_white.svg" class="octicon" /> <span data-localize="*">Delete</span></button>
 	</div>
 </dialog>
